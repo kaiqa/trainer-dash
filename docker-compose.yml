@@ -1,0 +1,84 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: training-dash-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password_change_me}
+      MYSQL_DATABASE: ${DB_NAME:-meetings_db}
+      MYSQL_USER: ${DB_USER:-meetings_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-meetings_password}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - training-dash-network
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+
+  # FastAPI Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: training-dash-app
+    restart: unless-stopped
+    environment:
+      - APP_ENV=production
+      - APP_HOST=0.0.0.0
+      - APP_PORT=5687
+      - DEBUG=false
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=${DB_USER:-meetings_user}
+      - DB_PASSWORD=${DB_PASSWORD:-meetings_password}
+      - DB_NAME=${DB_NAME:-meetings_db}
+      - WEBHOOK_HOST=${WEBHOOK_HOST:-0.0.0.0}
+      - WEBHOOK_PORT=${WEBHOOK_PORT:-5687}
+      - WEBHOOK_PATH=${WEBHOOK_PATH:-/webhook/req-meeting}
+      - CORS_ORIGINS=["http://localhost:5687","http://100.66.60.70:5687","http://100.122.130.97:5687"]
+      - LOG_LEVEL=INFO
+    ports:
+      - "5687:5687"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - training-dash-network
+    volumes:
+      - ./app/static:/app/app/static:ro
+
+  # Nginx Reverse Proxy (optional, for production with SSL)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: meetings-nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - app
+  #   networks:
+  #     - meetings-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  training-dash-network:
+    driver: bridge

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Training Planner Dashboard - Manage training sessions from Dogbrah AI">
+    <title>Training Planner Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/>
+                    </svg>
+                    <span class="logo-text">Training Dashboard</span>
+                </div>
+                <button class="btn-icon sidebar-collapse-toggle" id="sidebar-collapse-toggle" aria-label="Collapse sidebar" title="Collapse sidebar">
+                    <svg class="icon-collapse" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    <svg class="icon-expand" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="display: none;">
+                        <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-page="analytics">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="nav-item" data-page="settings">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1 2.83 0l.06-.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="connection-status">
+                    <span class="status-indicator" id="ws-status"></span>
+                    <span class="status-text" id="ws-status-text">Connecting...</span>
+                </div>
+                <div class="webhook-url-preview" id="webhook-url-preview">
+                    <label>Training Webhook URL:</label>
+                    <div class="url-display">
+                        <code id="training-webhook-url">Loading...</code>
+                        <button class="btn-icon" id="copy-training-webhook-url" title="Copy webhook URL">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" id="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="btn-icon sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+                    <h1 class="page-title" id="page-title">Dashboard</h1>
+                </div>
+                <div class="top-bar-right">
+                    <div class="search-box">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" id="search-input" placeholder="Search trainings..." aria-label="Search trainings">
+                    </div>
+                    <div class="export-buttons" id="export-buttons">
+                        <button class="btn btn-secondary" id="export-json" title="Export as JSON">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            JSON
+                        </button>
+                        <button class="btn btn-secondary" id="export-csv" title="Export as CSV">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            CSV
+                        </button>
+                    </div>
+                    <button class="btn btn-primary" id="refresh-btn" title="Refresh">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                        </svg>
+                    </button>
+                    <button class="btn-icon theme-toggle" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+                        <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="12" cy="12" r="5"/>
+                            <line x1="12" y1="1" x2="12" y2="3"/>
+                            <line x1="12" y1="21" x2="12" y2="23"/>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                            <line x1="1" y1="12" x2="3" y2="12"/>
+                            <line x1="21" y1="12" x2="23" y2="12"/>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                        </svg>
+                        <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="display: none;">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Page -->
+            <section class="page active" id="page-dashboard">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon total">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-total">0</span>
+                            <span class="stat-label">Total Sessions</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon planned">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-planned">0</span>
+                            <span class="stat-label">Planned</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon done">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-done">0</span>
+                            <span class="stat-label">Done</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon skipped">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="15" y1="9" x2="9" y2="15"/>
+                                <line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-skipped">0</span>
+                            <span class="stat-label">Skipped</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters-bar" id="filtersBar">
+                    <div class="filter-group">
+                        <label for="searchFilter">Search</label>
+                        <input type="text" id="searchFilter" placeholder="Search user, type, body type..." />
+                    </div>
+                    <div class="filter-group">
+                        <label for="userNameFilter">User Name</label>
+                        <input type="text" id="userNameFilter" placeholder="Filter by user name..." />
+                    </div>
+                    <div class="filter-group">
+                        <label for="statusFilter">Status</label>
+                        <select id="statusFilter">
+                            <option value="">All</option>
+                            <option value="planned">Planned</option>
+                            <option value="done">Done</option>
+                            <option value="skipped">Skipped</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="bodyTypeFilter">Body Type</label>
+                        <select id="bodyTypeFilter">
+                            <option value="">All</option>
+                            <option value="legs">Legs</option>
+                            <option value="chest">Chest</option>
+                            <option value="back">Back</option>
+                            <option value="shoulders">Shoulders</option>
+                            <option value="arms">Arms</option>
+                            <option value="core">Core</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="dateFromFilter">Date From</label>
+                        <input type="date" id="dateFromFilter" />
+                    </div>
+                    <div class="filter-group">
+                        <label for="dateToFilter">Date To</label>
+                        <input type="date" id="dateToFilter" />
+                    </div>
+                    <div class="filter-group">
+                        <label for="sortSelect">Sort by</label>
+                        <select id="sortSelect">
+                            <option value="created_at:desc">Newest First</option>
+                            <option value="created_at:asc">Oldest First</option>
+                            <option value="training_date:asc">Date (Asc)</option>
+                            <option value="training_date:desc">Date (Desc)</option>
+                            <option value="user_name:asc">Name (A-Z)</option>
+                            <option value="user_name:desc">Name (Z-A)</option>
+                            <option value="rating:desc">Rating (High-Low)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="pageSizeSelect">Per page</label>
+                        <select id="pageSizeSelect">
+                            <option value="10">10</option>
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <button class="btn btn-secondary" id="clearFiltersBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 6L6 18M6 6l12 12"></path>
+                            </svg>
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trainings Table -->
+                <div class="table-container">
+                    <table class="trainings-table" id="trainings-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="user_name" class="cell-name">Name <span class="sort-icon"></span></th>
+                                <th data-sort="type" class="cell-type">Type <span class="sort-icon"></span></th>
+                                <th data-sort="sets" class="cell-sets">Sets <span class="sort-icon"></span></th>
+                                <th data-sort="repetitions" class="cell-reps">Reps <span class="sort-icon"></span></th>
+                                <th data-sort="body_type" class="cell-body">Body <span class="sort-icon"></span></th>
+                                <th data-sort="training_date" class="cell-date">Date <span class="sort-icon"></span></th>
+                                <th data-sort="training_time" class="cell-time">Time <span class="sort-icon"></span></th>
+                                <th data-sort="time_spent_minutes" class="cell-duration">Duration <span class="sort-icon"></span></th>
+                                <th data-sort="weight" class="cell-weight">Weight <span class="sort-icon"></span></th>
+                                <th data-sort="rating" class="cell-rating">Rating <span class="sort-icon"></span></th>
+                                <th data-sort="status" class="cell-status">Status <span class="sort-icon"></span></th>
+                                <th class="cell-actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trainings-tbody">
+                            <!-- Rows populated by JS -->
+                        </tbody>
+                    </table>
+                    <div class="empty-state" id="empty-state" style="display: none;">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8z"/>
+                            <line x1="2" y1="8" x2="22" y2="8"/>
+                        </svg>
+                        <p>No training sessions found</p>
+                        <button class="btn btn-primary" id="refresh-empty">Refresh</button>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <button class="btn btn-sm btn-secondary" id="prev-page" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"/>
+                        </svg>
+                        Previous
+                    </button>
+                    <span class="pagination-info" id="pagination-info">Page 1 of 1</span>
+                    <button class="btn btn-sm btn-secondary" id="next-page" disabled>
+                        Next
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Analytics Page -->
+            <section class="page" id="page-analytics">
+                <h2>Analytics</h2>
+                <p style="color: var(--color-text-secondary); margin-bottom: 24px;">Visual overview of training session data.</p>
+
+                <div class="stats-grid" style="margin-bottom: 24px;">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <span class="stat-value" id="analytics-total">0</span>
+                            <span class="stat-label">Total Sessions</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <span class="stat-value" id="analytics-planned">0</span>
+                            <span class="stat-label">Planned</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <span class="stat-value" id="analytics-done">0</span>
+                            <span class="stat-label">Done</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <span class="stat-value" id="analytics-skipped">0</span>
+                            <span class="stat-label">Skipped</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-charts" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 24px;">
+                    <!-- Status Distribution (Doughnut) -->
+                    <div class="stat-card" style="flex-direction: column; align-items: flex-start; padding: 24px;">
+                        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 12px; color: var(--color-text-primary);">Status Distribution</h3>
+                        <div style="width: 100%; max-width: 350px; height: 300px; margin: 0 auto;">
+                            <canvas id="chart-status"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Body Type (Bar Chart) -->
+                    <div class="stat-card" style="flex-direction: column; align-items: flex-start; padding: 24px;">
+                        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 12px; color: var(--color-text-primary);">Sessions by Body Type</h3>
+                        <div style="width: 100%; height: 300px;">
+                            <canvas id="chart-body-type"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-charts" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 24px;">
+                    <!-- Type (Bar Chart) -->
+                    <div class="stat-card" style="flex-direction: column; align-items: flex-start; padding: 24px;">
+                        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 12px; color: var(--color-text-primary);">Training Type Distribution</h3>
+                        <div style="width: 100%; height: 300px;">
+                            <canvas id="chart-type"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Rating Distribution (Doughnut) -->
+                    <div class="stat-card" style="flex-direction: column; align-items: flex-start; padding: 24px;">
+                        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 12px; color: var(--color-text-primary);">Rating Distribution</h3>
+                        <div style="width: 100%; max-width: 350px; height: 300px; margin: 0 auto;">
+                            <canvas id="chart-rating"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leaderboard (Grouped Bar Chart per User) -->
+                <div class="analytics-charts" style="display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px;">
+                    <div class="stat-card" style="flex-direction: column; align-items: flex-start; padding: 24px;">
+                        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 12px; color: var(--color-text-primary);">🏆 Leaderboard — Per User Max Performance</h3>
+                        <p style="font-size: 0.8125rem; color: var(--color-text-secondary); margin-bottom: 16px;">Top users by max duration, weight, reps, and sets achieved in any session.</p>
+                        <div style="width: 100%; height: 350px;">
+                            <canvas id="chart-leaderboard"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Page -->
+            <section class="page" id="page-settings">
+                <div class="settings-container">
+                    <div class="settings-section">
+                        <h2>Webhook Configuration</h2>
+                        <p class="settings-description">
+                            Configure the webhook endpoint that Dogbrah AI will send training sessions to.
+                        </p>
+
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label for="setting-host">Listen IP Address</label>
+                                <input type="text" id="setting-host" placeholder="0.0.0.0 (all interfaces)">
+                                <span class="form-help">Use 0.0.0.0 to listen on all interfaces, or a specific IP</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-port">Port</label>
+                                <input type="number" id="setting-port" min="1" max="65535" placeholder="5687">
+                                <span class="form-help">Port number for the webhook server</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-training-path">Training Webhook Path</label>
+                                <input type="text" id="setting-training-path" placeholder="/webhook/record-training">
+                                <span class="form-help">Endpoint path for receiving training webhooks from Dogbrah AI</span>
+                            </div>
+
+                            <div class="webhook-url-display">
+                                <label>Full Training Webhook URL</label>
+                                <div class="url-display">
+                                    <code id="settings-training-webhook-url">http://localhost:5687/webhook/record-training</code>
+                                    <button class="btn-icon" id="copy-settings-training-url" title="Copy URL">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button class="btn btn-primary" id="save-settings">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                                        <polyline points="17 21 17 13 7 13 7 21"/>
+                                        <polyline points="7 3 7 8 15 8"/>
+                                    </svg>
+                                    Save Settings
+                                </button>
+                                <button class="btn btn-secondary" id="reset-settings">Reset to Defaults</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2>Application Info</h2>
+                        <div class="info-grid">
+                            <div class="info-card">
+                                <h3>Version</h3>
+                                <p id="app-version">1.0.0</p>
+                            </div>
+                            <div class="info-card">
+                                <h3>Environment</h3>
+                                <p id="app-env">production</p>
+                            </div>
+                            <div class="info-card">
+                                <h3>Database</h3>
+                                <p id="app-db">MySQL</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal-overlay" id="detail-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Training Details</h2>
+                <button class="btn-icon modal-close" id="modal-close" aria-label="Close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Populated by JS -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modal-close-btn">Close</button>
+                <button class="btn btn-primary" id="modal-save">Save Changes</button>
+                <button class="btn btn-secondary" id="modal-download">Download JSON</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2 id="confirm-title">Confirm Action</h2>
+            </div>
+            <div class="modal-body" id="confirm-body">
+                <!-- Populated by JS -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="confirm-cancel">Cancel</button>
+                <button class="btn btn-danger" id="confirm-ok">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
