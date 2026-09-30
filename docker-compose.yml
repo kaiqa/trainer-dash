@@ -13,7 +13,7 @@ services:
       - mysql_data:/var/lib/mysql
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     ports:
-      - "3306:3306"
+      - "3308:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -50,7 +50,7 @@ services:
       - CORS_ORIGINS=["http://localhost:5687","http://100.66.60.70:5687","http://100.122.130.97:5687"]
       - LOG_LEVEL=INFO
     ports:
-      - "5687:5687"
+      - "5690:5687"
     depends_on:
       mysql:
         condition: service_healthy
