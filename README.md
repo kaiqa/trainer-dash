@@ -1,6 +1,6 @@
 # Training Planner Dashboard
 
-A modern, production-ready dashboard for managing training sessions received via webhook from Dogbrah AI Fitness Coach. Built with FastAPI, MySQL, and vanilla JavaScript.
+A modern, production-ready dashboard for managing training sessions received via webhook from an AI fitness coach. Built with FastAPI, MySQL, and vanilla JavaScript.
 
 The dashboard transforms the old meeting request system into a fitness training planner that records, tracks, and manages workout sessions. Each session includes detailed training metrics, body part tracking, injury monitoring, pain reporting, and a user-provided rating.
 
@@ -22,8 +22,8 @@ The dashboard transforms the old meeting request system into a fitness training 
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────┐
-│   Dogbrah AI    │────▶│  Webhook Endpoint │────▶│   MySQL     │
-│ (Fitness Coach) │     │ /webhook/record-training       │
+│   AI Fitness    │────▶│  Webhook Endpoint │────▶│   MySQL     │
+│     Coach       │     │ /webhook/record-training       │
 └─────────────────┘     └────────┬─────────┘     └─────────────┘
                               │
                   ┌────────────┴────────────┐
@@ -133,7 +133,7 @@ All endpoints tested and verified working:
 |----------|--------|--------|-------------|
 | `/health` | GET | ✅ | Application health check |
 | `/webhook/health` | GET | ✅ | Webhook health check |
-| `/webhook/record-training` | POST | ✅ | Receive training session (Dogbrah AI) |
+| `/webhook/record-training` | POST | ✅ | Receive training session (AI fitness coach) |
 | `/api/trainings` | GET | ✅ | List trainings (paginated, filterable) |
 | `/api/trainings/{id}` | GET | ✅ | Get single training session |
 | `/api/trainings/{id}` | PATCH | ✅ | Update training session |
@@ -160,7 +160,7 @@ POST /webhook/record-training
 Content-Type: application/json
 ```
 
-The webhook accepts training session data from Dogbrah AI Fitness Coach:
+The webhook accepts training session data from the AI fitness coach:
 
 ```json
 {
@@ -291,7 +291,7 @@ WS /ws
 
 ### Status Workflow
 The training planner supports a simple but powerful status workflow:
-1. When Dogbrah AI sends a session, it's created with `status: planned`
+1. When the AI fitness coach sends a session, it's created with `status: planned`
 2. After completing the workout, update to `status: done`
 3. If the session is missed, update to `status: skipped`
 4. You can also update details (sets, repetitions, rating, notes) anytime
@@ -301,7 +301,7 @@ The training planner supports a simple but powerful status workflow:
 
 ### Settings Page
 - Configure webhook listen IP, port, and training webhook path
-- Live preview of full webhook URL for Dogbrah AI
+- Live preview of full webhook URL for the AI fitness coach
 - Copy URL to clipboard
 - Reset to defaults
 - Application info display
@@ -474,7 +474,7 @@ trainer-dash/
 ### Common Issues
 
 **Webhook not receiving requests:**
-- Verify Dogbrah AI is sending to the correct URL (`http://YOUR_IP:5687/webhook/record-training`)
+- Verify the AI fitness coach is sending to the correct URL (`http://YOUR_IP:5687/webhook/record-training`)
 - Check firewall allows port 5687
 - Verify `WEBHOOK_HOST` is set to `0.0.0.0` (not `localhost` or `127.0.0.1`)
 - Confirm `date` is in `DD.MM.YYYY` format and `time` is in `HH:MM` format
@@ -538,7 +538,7 @@ mypy app/
 
 ### Status Workflow Example
 
-When the Dogbrah AI fitness coach records a session, it sends the data to `/webhook/record-training`. The webhook creates the session with `status: planned`. After the user completes the workout, they update the status via the dashboard or API:
+When the AI fitness coach records a session, it sends the data to `/webhook/record-training`. The webhook creates the session with `status: planned`. After the user completes the workout, they update the status via the dashboard or API:
 
 ```bash
 # Mark session as done
