@@ -34,6 +34,8 @@ class DogbrahTrainingPayload(BaseModel):
       "rating": "7",
       "session_notes": "it was a hard training and my knees did hurt a little but nothing mayor give a rating 7 out of ten stars"
     }
+
+    For cardio activities (cycling, running, etc.), sets and repetitions can be omitted or set to "0".
     """
     model_config = ConfigDict(extra="allow")  # Allow extra fields
 
@@ -42,8 +44,8 @@ class DogbrahTrainingPayload(BaseModel):
     date: str = Field(..., description="Training date in DD.MM.YYYY format")
     time: str = Field(..., description="Training time in HH:MM format")
     type: str = Field(..., description="Training type (e.g., squats, bench_press)")
-    sets: str = Field(..., description="Number of sets")
-    repetitions: str = Field(..., description="Number of repetitions per set")
+    sets: Optional[str] = Field(None, description="Number of sets (optional, 0 for cardio)")
+    repetitions: Optional[str] = Field(None, description="Number of repetitions per set (optional, 0 for cardio)")
     weight: Optional[str] = Field(None, description="Weight in kg")
     body_type: str = Field(..., description="Body type trained (e.g., legs, chest, back)")
     injuries: str = Field(..., description="Whether user has injuries (yes/no)")
@@ -107,10 +109,10 @@ async def receive_training_session(
             detail=f"Invalid time format. Expected HH:MM, got: {payload.time}"
         )
 
-    # Parse numeric fields
+    # Parse numeric fields (default to 0 for cardio activities)
     try:
-        sets = int(payload.sets)
-        repetitions = int(payload.repetitions)
+        sets = int(payload.sets) if payload.sets else 0
+        repetitions = int(payload.repetitions) if payload.repetitions else 0
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,

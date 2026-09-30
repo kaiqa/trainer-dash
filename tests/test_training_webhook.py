@@ -89,6 +89,68 @@ class TestTrainingWebhookEndpoint:
     @pytest.mark.training
     @pytest.mark.webhook
     @pytest.mark.asyncio
+    async def test_receive_cardio_training_request(self, async_client: AsyncClient):
+        """Test receiving a cardio training request (sets/repetitions = 0 or omitted)."""
+        cardio_data = {
+            "user_name": "Jane Doe",
+            "time_spend_minutes": 30,
+            "date": "29.09.2026",
+            "time": "10:00",
+            "type": "cycling",
+            "body_type": "legs",
+            "injuries": "no",
+            "pain": "no",
+        }
+
+        response = await async_client.post(
+            "/webhook/record-training",
+            json=cardio_data,
+        )
+
+        assert response.status_code == 201
+        data = response.json()
+
+        assert data["user_name"] == "Jane Doe"
+        assert data["time_spent_minutes"] == 30
+        assert data["type"] == "cycling"
+        assert data["sets"] == 0
+        assert data["repetitions"] == 0
+        assert data["body_type"] == "legs"
+        assert data["injuries"] == "no"
+        assert data["pain"] == "no"
+
+    @pytest.mark.training
+    @pytest.mark.webhook
+    @pytest.mark.asyncio
+    async def test_receive_cardio_training_with_explicit_zero(self, async_client: AsyncClient):
+        """Test receiving a cardio training request with explicit 0 sets/repetitions."""
+        cardio_data = {
+            "user_name": "Jane Doe",
+            "time_spend_minutes": 30,
+            "date": "29.09.2026",
+            "time": "10:00",
+            "type": "running",
+            "sets": "0",
+            "repetitions": "0",
+            "body_type": "legs",
+            "injuries": "no",
+            "pain": "no",
+        }
+
+        response = await async_client.post(
+            "/webhook/record-training",
+            json=cardio_data,
+        )
+
+        assert response.status_code == 201
+        data = response.json()
+
+        assert data["sets"] == 0
+        assert data["repetitions"] == 0
+
+    @pytest.mark.training
+    @pytest.mark.webhook
+    @pytest.mark.asyncio
     async def test_receive_training_with_pain_and_source(self, async_client: AsyncClient):
         """Test receiving training with pain and pain source."""
         data = {

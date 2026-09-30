@@ -18,8 +18,8 @@ class TrainingBase(BaseModel):
     training_date: date = Field(..., description="Training date")
     training_time: time = Field(..., description="Training time")
     type: str = Field(..., min_length=1, max_length=100, description="Training type (e.g., squats, bench_press)")
-    sets: int = Field(..., ge=1, le=50, description="Number of sets")
-    repetitions: int = Field(..., ge=1, le=100, description="Number of repetitions per set")
+    sets: int = Field(0, ge=0, le=50, description="Number of sets (0 for cardio activities)")
+    repetitions: int = Field(0, ge=0, le=100, description="Number of repetitions per set (0 for cardio activities)")
     weight: Optional[float] = Field(None, ge=0, le=500, description="Weight in kg")
     body_type: str = Field(..., min_length=1, max_length=100, description="Body type trained (e.g., legs, chest, back)")
     injuries: str = Field("no", pattern="^(yes|no)$", description="Whether user has injuries (yes/no)")
@@ -40,8 +40,8 @@ class TrainingUpdate(BaseModel):
     training_date: Optional[date] = None
     training_time: Optional[time] = None
     type: Optional[str] = Field(None, min_length=1, max_length=100)
-    sets: Optional[int] = Field(None, ge=1, le=50)
-    repetitions: Optional[int] = Field(None, ge=1, le=100)
+    sets: Optional[int] = Field(None, ge=0, le=50)
+    repetitions: Optional[int] = Field(None, ge=0, le=100)
     weight: Optional[float] = Field(None, ge=0, le=500)
     body_type: Optional[str] = Field(None, min_length=1, max_length=100)
     injuries: Optional[str] = Field(None, pattern="^(yes|no)$")
