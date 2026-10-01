@@ -151,6 +151,145 @@ class TestTrainingWebhookEndpoint:
     @pytest.mark.training
     @pytest.mark.webhook
     @pytest.mark.asyncio
+    async def test_receive_training_with_status_planned(self, async_client: AsyncClient):
+        """Test receiving a training request with status='planned'."""
+        data = {
+            "user_name": "John Doe",
+            "time_spend_minutes": 30,
+            "date": "29.09.2026",
+            "time": "10:00",
+            "type": "squats",
+            "sets": "3",
+            "repetitions": "12",
+            "body_type": "legs",
+            "injuries": "no",
+            "pain": "no",
+            "status": "planned",
+        }
+
+        response = await async_client.post(
+            "/webhook/record-training",
+            json=data,
+        )
+
+        assert response.status_code == 201
+        result = response.json()
+        assert result["status"] == "planned"
+
+    @pytest.mark.training
+    @pytest.mark.webhook
+    @pytest.mark.asyncio
+    async def test_receive_training_with_status_done(self, async_client: AsyncClient):
+        """Test receiving a training request with status='done'."""
+        data = {
+            "user_name": "John Doe",
+            "time_spend_minutes": 30,
+            "date": "29.09.2026",
+            "time": "10:00",
+            "type": "squats",
+            "sets": "3",
+            "repetitions": "12",
+            "body_type": "legs",
+            "injuries": "no",
+            "pain": "no",
+            "status": "done",
+        }
+
+        response = await async_client.post(
+            "/webhook/record-training",
+            json=data,
+        )
+
+        assert response.status_code == 201
+        result = response.json()
+        assert result["status"] == "done"
+
+    @pytest.mark.training
+    @pytest.mark.webhook
+    @pytest.mark.asyncio
+    async def test_receive_training_with_status_skipped(self, async_client: AsyncClient):
+        """Test receiving a training request with status='skipped'."""
+        data = {
+            "user_name": "John Doe",
+            "time_spend_minutes": 30,
+            "date": "29.09.2026",
+            "time": "10:00",
+            "type": "squats",
+            "sets": "3",
+            "repetitions": "12",
+            "body_type": "legs",
+            "injuries": "no",
+            "pain": "no",
+            "status": "skipped",
+        }
+
+        response = await async_client.post(
+            "/webhook/record-training",
+            json=data,
+        )
+
+        assert response.status_code == 201
+        result = response.json()
+        assert result["status"] == "skipped"
+
+    @pytest.mark.training
+    @pytest.mark.webhook
+    @pytest.mark.asyncio
+    async def test_receive_training_with_invalid_status(self, async_client: AsyncClient):
+        """Test rejecting request with invalid status value."""
+        data = {
+            "user_name": "John Doe",
+            "time_spend_minutes": 30,
+            "date": "29.09.2026",
+            "time": "10:00",
+            "type": "squats",
+            "sets": "3",
+            "repetitions": "12",
+            "body_type": "legs",
+            "injuries": "no",
+            "pain": "no",
+            "status": "invalid",
+        }
+
+        response = await async_client.post(
+            "/webhook/record-training",
+            json=data,
+        )
+
+        assert response.status_code == 422
+
+    @pytest.mark.training
+    @pytest.mark.webhook
+    @pytest.mark.asyncio
+    async def test_receive_training_with_case_insensitive_status(self, async_client: AsyncClient):
+        """Test that status is case-insensitive."""
+        for status_value in ["PLANNED", "Done", "SkIpPeD"]:
+            data = {
+                "user_name": "John Doe",
+                "time_spend_minutes": 30,
+                "date": "29.09.2026",
+                "time": "10:00",
+                "type": "squats",
+                "sets": "3",
+                "repetitions": "12",
+                "body_type": "legs",
+                "injuries": "no",
+                "pain": "no",
+                "status": status_value,
+            }
+
+            response = await async_client.post(
+                "/webhook/record-training",
+                json=data,
+            )
+
+            assert response.status_code == 201, f"Failed for status: {status_value}"
+            result = response.json()
+            assert result["status"] == status_value.lower()
+
+    @pytest.mark.training
+    @pytest.mark.webhook
+    @pytest.mark.asyncio
     async def test_receive_training_with_pain_and_source(self, async_client: AsyncClient):
         """Test receiving training with pain and pain source."""
         data = {

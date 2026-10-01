@@ -32,10 +32,12 @@ class DogbrahTrainingPayload(BaseModel):
       "pain": "yes",
       "pain_source": "knees",
       "rating": "7",
-      "session_notes": "it was a hard training and my knees did hurt a little but nothing mayor give a rating 7 out of ten stars"
+      "session_notes": "it was a hard training and my knees did hurt a little but nothing mayor give a rating 7 out of ten stars",
+      "status": "planned"
     }
 
     For cardio activities (cycling, running, etc.), sets and repetitions can be omitted or set to "0".
+    Status can be "planned", "done", or "skipped" (optional, defaults to "planned").
     """
     model_config = ConfigDict(extra="allow")  # Allow extra fields
 
@@ -53,6 +55,7 @@ class DogbrahTrainingPayload(BaseModel):
     pain_source: Optional[str] = Field(None, description="Source of pain if any")
     rating: Optional[str] = Field(None, description="Training rating 1-10")
     session_notes: Optional[str] = Field(None, description="Session notes")
+    status: Optional[str] = Field(None, description="Training status: planned, done, or skipped (optional, defaults to planned)")
 
 
 @router.post(
@@ -166,6 +169,17 @@ async def receive_training_session(
             detail="pain_source is required when pain is 'yes'"
         )
 
+    # Parse status if provided (default to PLANNED)
+    training_status = TrainingStatus.PLANNED
+    if payload.status:
+        status_value = payload.status.lower().strip()
+        if status_value not in ("planned", "done", "skipped"):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="status must be 'planned', 'done', or 'skipped'"
+            )
+        training_status = TrainingStatus(status_value)
+
     # Create training record
     training = Training(
         user_name=payload.user_name,
@@ -182,7 +196,7 @@ async def receive_training_session(
         pain_source=payload.pain_source,
         rating=rating,
         session_notes=payload.session_notes,
-        status=TrainingStatus.PLANNED,
+        status=training_status,
     )
 
     db.add(training)
